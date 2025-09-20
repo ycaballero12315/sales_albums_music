@@ -1,11 +1,10 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List, Dict, Optional
+from middleware.errors import error_handling_middleware
 from routers import product
 
 app = FastAPI()
 
-
+app.middleware('http')(error_handling_middleware)
 app.include_router(product.router)
 # --- IGNORE ---    
 
