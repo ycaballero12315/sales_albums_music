@@ -37,5 +37,16 @@ async def get_artist(db: Session = Depends(get_db)):
            summary="Get all customer", 
            response_model=list[CustomerSchema])
 async def get_customer(db: Session = Depends(get_db)):
-    db_customer = db.scalars(select(CustomerModel).where(CustomerModel.country == 'Brazil')).all()
-    return [CustomerSchema.model_validate(customer) for customer in db_customer]
+    try:
+        db_customer = db.scalars(select(CustomerModel).where(CustomerModel.country == 'Brazil')).all()
+        if not db_customer:
+            raise HTTPException(
+                status_code= status.HTTP_422_UNPROCESSABLE_CONTENT
+                detail="No se pudo realizar la consulta"
+            )
+        return [CustomerSchema.model_validate(customer) for customer in db_customer]
+    except SQLAlchemyError as e_sql:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail=f'Error: {e_sql}'
+        )
